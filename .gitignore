@@ -5,6 +5,7 @@
 /api
 /go-beresin
 /go-beresin-server
+/tmp/main
 test_geo
 
 # IDEs

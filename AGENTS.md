@@ -2,11 +2,11 @@
 
 ## Entrypoints
 
-| Purpose | Command |
-|---|---|
-| API server | `cmd/api/main.go` |
+| Purpose       | Command                           |
+| ------------- | --------------------------------- |
+| API server    | `cmd/api/main.go`                 |
 | DB migrations | `cmd/migrate/main.go up` / `down` |
-| Seed data | `cmd/seed/main.go` |
+| Seed data     | `cmd/seed/main.go`                |
 
 ## Architecture (Layered)
 
@@ -63,3 +63,7 @@ go test ./internal/...              # integration tests (needs live Postgres + R
 
 - `.env` file (gitignored) or Doppler CLI. See `.env.example` for template.
 - Test env vars from `../../../.env` relative to test file.
+
+## Response Agent
+
+- Setiap Jawaban Gunakan Bahasa Indonesia
