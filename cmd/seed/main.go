@@ -5,11 +5,15 @@ import (
 	"log"
 
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/joho/godotenv"
 	"go-beresin/internal/repository"
 	"go-beresin/pkg/database"
 )
 
 func main() {
+	// Load .env file
+	_ = godotenv.Load()
+
 	ctx := context.Background()
 
 	// Initialize database pool

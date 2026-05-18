@@ -8,10 +8,14 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/joho/godotenv"
 	"go-beresin/pkg/database"
 )
 
 func main() {
+	// Load .env file
+	_ = godotenv.Load()
+
 	if len(os.Args) < 2 {
 		log.Fatalf("Usage: go run cmd/migrate/main.go [up|down]")
 	}
