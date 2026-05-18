@@ -55,9 +55,6 @@ func (s *authService) Register(ctx context.Context, req domain.RegisterReq, ip, 
 	if role == "" {
 		role = "user"
 	}
-	if role != "user" && role != "talent" {
-		return nil, domain.NewValidationError("role must be 'user' or 'talent'")
-	}
 
 	_, err := s.q.GetUserByEmail(ctx, pgtype.Text{String: req.Email, Valid: true})
 	if err == nil {
@@ -121,10 +118,6 @@ func (s *authService) Login(ctx context.Context, req domain.LoginReq, ip, userAg
 	}
 	if blocked {
 		return nil, fmt.Errorf("%w: %d", domain.ErrIPBlocked, int(ttl.Seconds()))
-	}
-
-	if req.Email == "" || req.Password == "" {
-		return nil, domain.NewValidationError("email and password are required")
 	}
 
 	user, err := s.q.GetUserByEmail(ctx, pgtype.Text{String: req.Email, Valid: true})
@@ -259,10 +252,6 @@ func (s *authService) SendWhatsAppOTP(ctx context.Context, req domain.SendOtpReq
 }
 
 func (s *authService) VerifyWhatsAppOTP(ctx context.Context, req domain.VerifyOtpReq, ip, userAgent string) (*domain.LoginResp, error) {
-	if req.Phone == "" || req.OTP == "" {
-		return nil, domain.NewValidationError("phone number and OTP are required")
-	}
-
 	otpKey := fmt.Sprintf("whatsapp_otp:%s", req.Phone)
 
 	storedOtp, err := s.rdb.Get(ctx, otpKey).Result()
@@ -327,10 +316,6 @@ func (s *authService) VerifyWhatsAppOTP(ctx context.Context, req domain.VerifyOt
 }
 
 func (s *authService) RefreshToken(ctx context.Context, req domain.RefreshTokenReq) (*domain.RefreshTokenResp, error) {
-	if req.RefreshToken == "" {
-		return nil, domain.NewValidationError("refresh token is required")
-	}
-
 	claims, err := utils.ValidateToken(req.RefreshToken)
 	if err != nil {
 		return nil, domain.NewValidationError("invalid or expired refresh token")
@@ -367,10 +352,6 @@ func (s *authService) Logout(ctx context.Context, userID string) error {
 }
 
 func (s *authService) ForgotPassword(ctx context.Context, req domain.ForgotPasswordReq) error {
-	if req.Email == "" {
-		return domain.NewValidationError("email address is required")
-	}
-
 	user, err := s.q.GetUserByEmail(ctx, pgtype.Text{String: req.Email, Valid: true})
 	if err != nil {
 		return nil
@@ -389,14 +370,6 @@ func (s *authService) ForgotPassword(ctx context.Context, req domain.ForgotPassw
 }
 
 func (s *authService) ResetPassword(ctx context.Context, req domain.ResetPasswordReq, ip, userAgent string) error {
-	if req.Token == "" || req.NewPassword == "" {
-		return domain.NewValidationError("reset token and new password are required")
-	}
-
-	if len(req.NewPassword) < 8 {
-		return domain.NewValidationError("new password must be at least 8 characters long")
-	}
-
 	tokenKey := fmt.Sprintf("reset_password_token:%s", req.Token)
 
 	userIDStr, err := s.rdb.Get(ctx, tokenKey).Result()

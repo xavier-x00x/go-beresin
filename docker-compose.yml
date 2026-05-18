@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -65,3 +63,10 @@ services:
 volumes:
   minio_data:
   es_data:
+
+# To run the application, use:
+# docker compose up --build -d
+# stop with:
+# docker compose down
+# logs for app:
+# docker compose logs -f app

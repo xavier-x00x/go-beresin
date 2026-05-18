@@ -1,0 +1,130 @@
+### Variables
+@host = localhost
+@baseUrl = http://{{host}}:8080
+@accessToken = {{login.response.body.data.access_token}}
+@refreshToken = {{login.response.body.data.refresh_token}}
+
+### Health Check
+GET {{baseUrl}}/health
+
+### ========================
+### AUTH
+### ========================
+
+### Register
+POST {{baseUrl}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "phone": "6281234567890",
+  "password": "Password123!",
+  "full_name": "John Doe",
+  "role": "user"
+}
+
+### Login
+# @name login
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "Password123!"
+}
+
+### Google Login
+POST {{baseUrl}}/api/v1/auth/login/google
+Content-Type: application/json
+
+{
+  "token": "google-oauth-id-token"
+}
+
+### Send WhatsApp OTP
+POST {{baseUrl}}/api/v1/auth/login/whatsapp/send-otp
+Content-Type: application/json
+
+{
+  "phone": "6281234567890"
+}
+
+### Verify WhatsApp OTP
+POST {{baseUrl}}/api/v1/auth/login/whatsapp/verify
+Content-Type: application/json
+
+{
+  "phone": "6281234567890",
+  "otp": "123456"
+}
+
+### Refresh Token
+POST {{baseUrl}}/api/v1/auth/refresh-token
+Content-Type: application/json
+
+{
+  "refresh_token": "{{refreshToken}}"
+}
+
+### Logout (requires JWT)
+POST {{baseUrl}}/api/v1/auth/logout
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{}
+
+### Forgot Password
+POST {{baseUrl}}/api/v1/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "user@example.com"
+}
+
+### Reset Password
+POST {{baseUrl}}/api/v1/auth/reset-password
+Content-Type: application/json
+
+{
+  "token": "reset-token-from-email",
+  "new_password": "NewPassword123!"
+}
+
+### ========================
+### PROFILE (requires JWT)
+### ========================
+
+### Get Profile
+GET {{baseUrl}}/api/v1/profile
+Authorization: Bearer {{accessToken}}
+
+### ========================
+### UPLOAD (requires JWT)
+### ========================
+
+### Upload File
+POST {{baseUrl}}/api/v1/upload
+Authorization: Bearer {{accessToken}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="example.jpg"
+Content-Type: image/jpeg
+
+< ./example.jpg
+--boundary--
+
+### ========================
+### ADMIN (requires JWT + admin role)
+### ========================
+
+### Admin Only
+GET {{baseUrl}}/api/v1/admin/
+Authorization: Bearer {{accessToken}}
+
+### ========================
+### SWAGGER
+### ========================
+
+### Swagger Docs
+GET {{baseUrl}}/swagger/index.html

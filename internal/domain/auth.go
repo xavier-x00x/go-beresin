@@ -3,42 +3,42 @@ package domain
 import "errors"
 
 type RegisterReq struct {
-	Email    string `json:"email"`
-	Phone    string `json:"phone"`
-	Password string `json:"password"`
-	FullName string `json:"full_name"`
-	Role     string `json:"role"`
+	Email    string `json:"email" validate:"required,email"`
+	Phone    string `json:"phone" validate:"required,phone"`
+	Password string `json:"password" validate:"required,min=8"`
+	FullName string `json:"full_name" validate:"required"`
+	Role     string `json:"role" validate:"omitempty,oneof=user talent"`
 }
 
 type LoginReq struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
 
 type GoogleLoginReq struct {
-	Token string `json:"token"`
+	Token string `json:"token" validate:"required"`
 }
 
 type SendOtpReq struct {
-	Phone string `json:"phone"`
+	Phone string `json:"phone" validate:"required,phone"`
 }
 
 type VerifyOtpReq struct {
-	Phone string `json:"phone"`
-	OTP   string `json:"otp"`
+	Phone string `json:"phone" validate:"required,phone"`
+	OTP   string `json:"otp" validate:"required"`
 }
 
 type RefreshTokenReq struct {
-	RefreshToken string `json:"refresh_token"`
+	RefreshToken string `json:"refresh_token" validate:"required"`
 }
 
 type ForgotPasswordReq struct {
-	Email string `json:"email"`
+	Email string `json:"email" validate:"required,email"`
 }
 
 type ResetPasswordReq struct {
-	Token       string `json:"token"`
-	NewPassword string `json:"new_password"`
+	Token       string `json:"token" validate:"required"`
+	NewPassword string `json:"new_password" validate:"required,min=8"`
 }
 
 type RegisterResp struct {

@@ -1,21 +1,127 @@
 basePath: /
 definitions:
-  handler.ForgotPasswordReq:
+  domain.ForgotPasswordReq:
     properties:
       email:
         type: string
+    required:
+    - email
     type: object
-  handler.GoogleLoginReq:
+  domain.GoogleLoginReq:
     properties:
       token:
         type: string
+    required:
+    - token
     type: object
-  handler.LoginReq:
+  domain.LoginReq:
     properties:
       email:
         type: string
       password:
         type: string
+    required:
+    - email
+    - password
+    type: object
+  domain.LoginResp:
+    properties:
+      access_token:
+        type: string
+      full_name:
+        type: string
+      refresh_token:
+        type: string
+      role:
+        type: string
+      user_id:
+        type: string
+    type: object
+  domain.RefreshTokenReq:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  domain.RefreshTokenResp:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  domain.RegisterReq:
+    properties:
+      email:
+        type: string
+      full_name:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      phone:
+        type: string
+      role:
+        enum:
+        - user
+        - talent
+        type: string
+    required:
+    - email
+    - full_name
+    - password
+    - phone
+    type: object
+  domain.RegisterResp:
+    properties:
+      email:
+        type: string
+      full_name:
+        type: string
+      phone:
+        type: string
+      role:
+        type: string
+      user_id:
+        type: string
+    type: object
+  domain.ResetPasswordReq:
+    properties:
+      new_password:
+        minLength: 8
+        type: string
+      token:
+        type: string
+    required:
+    - new_password
+    - token
+    type: object
+  domain.SendOtpReq:
+    properties:
+      phone:
+        type: string
+    required:
+    - phone
+    type: object
+  domain.VerifyOtpReq:
+    properties:
+      otp:
+        type: string
+      phone:
+        type: string
+    required:
+    - otp
+    - phone
+    type: object
+  handler.ErrorResp:
+    properties:
+      message:
+        example: Invalid request payload
+        type: string
+      success:
+        example: false
+        type: boolean
     type: object
   handler.LoginRequest:
     properties:
@@ -25,54 +131,51 @@ definitions:
       username:
         example: johndoe
         type: string
+    required:
+    - username
     type: object
-  handler.RefreshTokenReq:
+  handler.LoginResp:
     properties:
-      refresh_token:
+      data:
+        $ref: '#/definitions/domain.LoginResp'
+      message:
+        example: Successfully authenticated
         type: string
+      success:
+        example: true
+        type: boolean
     type: object
-  handler.RegisterReq:
+  handler.MessageResp:
     properties:
-      email:
-        type: string
-      full_name:
-        type: string
-      password:
-        type: string
-      phone:
-        type: string
-      role:
-        description: '''user'', ''talent'''
-        type: string
-    type: object
-  handler.ResetPasswordReq:
-    properties:
-      new_password:
-        type: string
-      token:
-        type: string
-    type: object
-  handler.Response:
-    properties:
-      data: {}
       message:
         example: Operation completed successfully
         type: string
-      status:
-        example: success
-        type: string
+      success:
+        example: true
+        type: boolean
     type: object
-  handler.SendOtpReq:
+  handler.RefreshTokenResp:
     properties:
-      phone:
+      data:
+        $ref: '#/definitions/domain.RefreshTokenResp'
+      message:
+        example: Tokens successfully rotated
         type: string
+      success:
+        example: true
+        type: boolean
     type: object
-  handler.VerifyOtpReq:
+  handler.RegisterResp:
     properties:
-      otp:
+      data:
+        $ref: '#/definitions/domain.RegisterResp'
+      message:
+        example: Registration completed successfully. Please check your email to verify
+          your account.
         type: string
-      phone:
-        type: string
+      success:
+        example: true
+        type: boolean
     type: object
 host: localhost:8080
 info:
@@ -97,15 +200,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.MessageResp'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.ErrorResp'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.ErrorResp'
       security:
       - BearerAuth: []
       summary: Admin Endpoint
@@ -115,25 +218,25 @@ paths:
     post:
       consumes:
       - application/json
-      description: Request a password reset email token
+      description: Send password reset link to email
       parameters:
       - description: Forgot Password Payload
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.ForgotPasswordReq'
+          $ref: '#/definitions/domain.ForgotPasswordReq'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.MessageResp'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.ErrorResp'
       summary: Forgot Password
       tags:
       - Authentication
@@ -148,26 +251,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.LoginReq'
+          $ref: '#/definitions/domain.LoginReq'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.LoginResp'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.ErrorResp'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.ErrorResp'
         "429":
           description: Too Many Requests
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.ErrorResp'
       summary: User Login
       tags:
       - Authentication
@@ -190,11 +293,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.MessageResp'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.ErrorResp'
       summary: Mock Login
       tags:
       - Authentication
@@ -202,51 +305,55 @@ paths:
     post:
       consumes:
       - application/json
-      description: Login or register automatically via Google OAuth token
+      description: Authenticate using Google OAuth ID token
       parameters:
-      - description: Google Token Payload
+      - description: Google Login Payload
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.GoogleLoginReq'
+          $ref: '#/definitions/domain.GoogleLoginReq'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.LoginResp'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handler.Response'
-      summary: Google Social Login
+            $ref: '#/definitions/handler.ErrorResp'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResp'
+      summary: Google Login
       tags:
       - Authentication
   /api/v1/auth/login/whatsapp/send-otp:
     post:
       consumes:
       - application/json
-      description: Request a 6-digit WhatsApp login OTP
+      description: Send OTP code to phone number via WhatsApp
       parameters:
       - description: Send OTP Payload
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.SendOtpReq'
+          $ref: '#/definitions/domain.SendOtpReq'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.MessageResp'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.ErrorResp'
       summary: Send WhatsApp OTP
       tags:
       - Authentication
@@ -254,75 +361,79 @@ paths:
     post:
       consumes:
       - application/json
-      description: Verify WhatsApp OTP code and start login session
+      description: Verify OTP code and authenticate via WhatsApp
       parameters:
       - description: Verify OTP Payload
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.VerifyOtpReq'
+          $ref: '#/definitions/domain.VerifyOtpReq'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.LoginResp'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.ErrorResp'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResp'
       summary: Verify WhatsApp OTP
       tags:
       - Authentication
   /api/v1/auth/logout:
     post:
-      description: Invalidate user active session and revoke refresh token
+      description: Invalidate refresh token and terminate session
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.MessageResp'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.ErrorResp'
       security:
       - BearerAuth: []
-      summary: User Logout
+      summary: Logout
       tags:
       - Authentication
   /api/v1/auth/refresh-token:
     post:
       consumes:
       - application/json
-      description: Rotate expired access token using valid refresh token
+      description: Rotate access and refresh token pair
       parameters:
       - description: Refresh Token Payload
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.RefreshTokenReq'
+          $ref: '#/definitions/domain.RefreshTokenReq'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.RefreshTokenResp'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.ErrorResp'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handler.Response'
-      summary: Refresh Token Rotation
+            $ref: '#/definitions/handler.ErrorResp'
+      summary: Refresh Token
       tags:
       - Authentication
   /api/v1/auth/register:
@@ -336,22 +447,22 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.RegisterReq'
+          $ref: '#/definitions/domain.RegisterReq'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.RegisterResp'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.ErrorResp'
         "409":
           description: Conflict
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.ErrorResp'
       summary: User Registration
       tags:
       - Authentication
@@ -359,25 +470,25 @@ paths:
     post:
       consumes:
       - application/json
-      description: Reset password utilizing valid email reset token
+      description: Reset password using email reset token
       parameters:
       - description: Reset Password Payload
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.ResetPasswordReq'
+          $ref: '#/definitions/domain.ResetPasswordReq'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.MessageResp'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.ErrorResp'
       summary: Reset Password
       tags:
       - Authentication
@@ -390,16 +501,16 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.MessageResp'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.ErrorResp'
       security:
       - BearerAuth: []
       summary: Get Profile
       tags:
-      - Users
+      - Authentication
   /api/v1/upload:
     post:
       consumes:
@@ -417,15 +528,15 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.MessageResp'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.ErrorResp'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.ErrorResp'
       summary: File Upload
       tags:
       - Uploads
@@ -438,7 +549,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.Response'
+            $ref: '#/definitions/handler.MessageResp'
       summary: Health Check
       tags:
       - System

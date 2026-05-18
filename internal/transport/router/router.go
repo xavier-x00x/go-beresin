@@ -1,6 +1,9 @@
 package router
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -11,6 +14,7 @@ import (
 	"go-beresin/internal/service"
 	"go-beresin/internal/transport/handler"
 	"go-beresin/internal/transport/middleware"
+	"github.com/swaggo/swag"
 )
 
 // SetupRoutes registers all routes and middlewares.
@@ -26,7 +30,16 @@ func SetupRoutes(app *fiber.App, rdb *redis.Client, dbPool *pgxpool.Pool) {
 	limiter := middleware.NewRateLimiter(rdb)
 	app.Use(limiter.GlobalLimit())
 
-	// 3. Swagger Route
+	// 3. Swagger Route (with dynamic host so "Try it out" works from any device)
+	app.Get("/swagger/doc.json", func(c *fiber.Ctx) error {
+		spec, err := swag.ReadDoc()
+		if err != nil {
+			return err
+		}
+		spec = strings.Replace(spec, `"host": "localhost:8080"`, fmt.Sprintf(`"host": "%s"`, c.Get("Host")), 1)
+		c.Set("Content-Type", "application/json")
+		return c.SendString(spec)
+	})
 	app.Get("/swagger/*", swagger.HandlerDefault)
 
 	// 4. Initialise Service & Handlers
@@ -56,7 +69,7 @@ func SetupRoutes(app *fiber.App, rdb *redis.Client, dbPool *pgxpool.Pool) {
 	protected := v1.Group("/", middleware.JWTAuth())
 	
 	// User profile
-	protected.Get("/profile", h.Profile)
+	protected.Get("/profile", authH.Profile)
 	
 	// File Upload Handler (Multipart)
 	protected.Post("/upload", h.Upload)

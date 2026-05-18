@@ -9,6 +9,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
+	"go-beresin/internal/transport/response"
 )
 
 // RateLimiter holds the Redis client and defines limit rules.
@@ -91,16 +92,7 @@ func (rl *RateLimiter) Limit(group string, limit int, duration time.Duration) fi
 
 		// If the limit has been exceeded, return 429 Too Many Requests
 		if count > int64(limit) {
-			return c.Status(fiber.StatusTooManyRequests).JSON(Response{
-				Status:  "error",
-				Message: "Too many requests. Please try again later.",
-				Data: fiber.Map{
-					"limit":             limit,
-					"remaining":         0,
-					"retry_after_sec":   ttl,
-					"rate_limit_group":  group,
-				},
-			})
+			return response.Error(c, fiber.StatusTooManyRequests, "Rate limit exceeded. Please try again later.")
 		}
 
 		return c.Next()

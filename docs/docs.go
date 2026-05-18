@@ -42,19 +42,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.MessageResp"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.ErrorResp"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.ErrorResp"
                         }
                     }
                 }
@@ -62,7 +62,7 @@ const docTemplate = `{
         },
         "/api/v1/auth/forgot-password": {
             "post": {
-                "description": "Request a password reset email token",
+                "description": "Send password reset link to email",
                 "consumes": [
                     "application/json"
                 ],
@@ -80,7 +80,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.ForgotPasswordReq"
+                            "$ref": "#/definitions/domain.ForgotPasswordReq"
                         }
                     }
                 ],
@@ -88,13 +88,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.MessageResp"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.ErrorResp"
                         }
                     }
                 }
@@ -120,7 +120,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.LoginReq"
+                            "$ref": "#/definitions/domain.LoginReq"
                         }
                     }
                 ],
@@ -128,25 +128,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.LoginResp"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.ErrorResp"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.ErrorResp"
                         }
                     },
                     "429": {
                         "description": "Too Many Requests",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.ErrorResp"
                         }
                     }
                 }
@@ -180,13 +180,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.MessageResp"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.ErrorResp"
                         }
                     }
                 }
@@ -194,7 +194,7 @@ const docTemplate = `{
         },
         "/api/v1/auth/login/google": {
             "post": {
-                "description": "Login or register automatically via Google OAuth token",
+                "description": "Authenticate using Google OAuth ID token",
                 "consumes": [
                     "application/json"
                 ],
@@ -204,15 +204,15 @@ const docTemplate = `{
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "Google Social Login",
+                "summary": "Google Login",
                 "parameters": [
                     {
-                        "description": "Google Token Payload",
+                        "description": "Google Login Payload",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.GoogleLoginReq"
+                            "$ref": "#/definitions/domain.GoogleLoginReq"
                         }
                     }
                 ],
@@ -220,13 +220,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.LoginResp"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.ErrorResp"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResp"
                         }
                     }
                 }
@@ -234,7 +240,7 @@ const docTemplate = `{
         },
         "/api/v1/auth/login/whatsapp/send-otp": {
             "post": {
-                "description": "Request a 6-digit WhatsApp login OTP",
+                "description": "Send OTP code to phone number via WhatsApp",
                 "consumes": [
                     "application/json"
                 ],
@@ -252,7 +258,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.SendOtpReq"
+                            "$ref": "#/definitions/domain.SendOtpReq"
                         }
                     }
                 ],
@@ -260,13 +266,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.MessageResp"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.ErrorResp"
                         }
                     }
                 }
@@ -274,7 +280,7 @@ const docTemplate = `{
         },
         "/api/v1/auth/login/whatsapp/verify": {
             "post": {
-                "description": "Verify WhatsApp OTP code and start login session",
+                "description": "Verify OTP code and authenticate via WhatsApp",
                 "consumes": [
                     "application/json"
                 ],
@@ -292,7 +298,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.VerifyOtpReq"
+                            "$ref": "#/definitions/domain.VerifyOtpReq"
                         }
                     }
                 ],
@@ -300,13 +306,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.LoginResp"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.ErrorResp"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResp"
                         }
                     }
                 }
@@ -319,25 +331,25 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Invalidate user active session and revoke refresh token",
+                "description": "Invalidate refresh token and terminate session",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "User Logout",
+                "summary": "Logout",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.MessageResp"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.ErrorResp"
                         }
                     }
                 }
@@ -345,7 +357,7 @@ const docTemplate = `{
         },
         "/api/v1/auth/refresh-token": {
             "post": {
-                "description": "Rotate expired access token using valid refresh token",
+                "description": "Rotate access and refresh token pair",
                 "consumes": [
                     "application/json"
                 ],
@@ -355,7 +367,7 @@ const docTemplate = `{
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "Refresh Token Rotation",
+                "summary": "Refresh Token",
                 "parameters": [
                     {
                         "description": "Refresh Token Payload",
@@ -363,7 +375,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.RefreshTokenReq"
+                            "$ref": "#/definitions/domain.RefreshTokenReq"
                         }
                     }
                 ],
@@ -371,19 +383,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.RefreshTokenResp"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.ErrorResp"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.ErrorResp"
                         }
                     }
                 }
@@ -409,7 +421,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.RegisterReq"
+                            "$ref": "#/definitions/domain.RegisterReq"
                         }
                     }
                 ],
@@ -417,19 +429,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.RegisterResp"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.ErrorResp"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.ErrorResp"
                         }
                     }
                 }
@@ -437,7 +449,7 @@ const docTemplate = `{
         },
         "/api/v1/auth/reset-password": {
             "post": {
-                "description": "Reset password utilizing valid email reset token",
+                "description": "Reset password using email reset token",
                 "consumes": [
                     "application/json"
                 ],
@@ -455,7 +467,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.ResetPasswordReq"
+                            "$ref": "#/definitions/domain.ResetPasswordReq"
                         }
                     }
                 ],
@@ -463,13 +475,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.MessageResp"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.ErrorResp"
                         }
                     }
                 }
@@ -487,20 +499,20 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "Authentication"
                 ],
                 "summary": "Get Profile",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.MessageResp"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.ErrorResp"
                         }
                     }
                 }
@@ -532,19 +544,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.MessageResp"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.ErrorResp"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.ErrorResp"
                         }
                     }
                 }
@@ -564,7 +576,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.Response"
+                            "$ref": "#/definitions/handler.MessageResp"
                         }
                     }
                 }
@@ -572,24 +584,34 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handler.ForgotPasswordReq": {
+        "domain.ForgotPasswordReq": {
             "type": "object",
+            "required": [
+                "email"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
                 }
             }
         },
-        "handler.GoogleLoginReq": {
+        "domain.GoogleLoginReq": {
             "type": "object",
+            "required": [
+                "token"
+            ],
             "properties": {
                 "token": {
                     "type": "string"
                 }
             }
         },
-        "handler.LoginReq": {
+        "domain.LoginReq": {
             "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -599,8 +621,159 @@ const docTemplate = `{
                 }
             }
         },
+        "domain.LoginResp": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.RefreshTokenReq": {
+            "type": "object",
+            "required": [
+                "refresh_token"
+            ],
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.RefreshTokenResp": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.RegisterReq": {
+            "type": "object",
+            "required": [
+                "email",
+                "full_name",
+                "password",
+                "phone"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 8
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string",
+                    "enum": [
+                        "user",
+                        "talent"
+                    ]
+                }
+            }
+        },
+        "domain.RegisterResp": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.ResetPasswordReq": {
+            "type": "object",
+            "required": [
+                "new_password",
+                "token"
+            ],
+            "properties": {
+                "new_password": {
+                    "type": "string",
+                    "minLength": 8
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.SendOtpReq": {
+            "type": "object",
+            "required": [
+                "phone"
+            ],
+            "properties": {
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.VerifyOtpReq": {
+            "type": "object",
+            "required": [
+                "otp",
+                "phone"
+            ],
+            "properties": {
+                "otp": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.ErrorResp": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Invalid request payload"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": false
+                }
+            }
+        },
         "handler.LoginRequest": {
             "type": "object",
+            "required": [
+                "username"
+            ],
             "properties": {
                 "role": {
                     "type": "string",
@@ -612,76 +785,64 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.RefreshTokenReq": {
+        "handler.LoginResp": {
             "type": "object",
             "properties": {
-                "refresh_token": {
-                    "type": "string"
+                "data": {
+                    "$ref": "#/definitions/domain.LoginResp"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Successfully authenticated"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
-        "handler.RegisterReq": {
+        "handler.MessageResp": {
             "type": "object",
             "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "full_name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "phone": {
-                    "type": "string"
-                },
-                "role": {
-                    "description": "'user', 'talent'",
-                    "type": "string"
-                }
-            }
-        },
-        "handler.ResetPasswordReq": {
-            "type": "object",
-            "properties": {
-                "new_password": {
-                    "type": "string"
-                },
-                "token": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.Response": {
-            "type": "object",
-            "properties": {
-                "data": {},
                 "message": {
                     "type": "string",
                     "example": "Operation completed successfully"
                 },
-                "status": {
-                    "type": "string",
-                    "example": "success"
+                "success": {
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
-        "handler.SendOtpReq": {
+        "handler.RefreshTokenResp": {
             "type": "object",
             "properties": {
-                "phone": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.VerifyOtpReq": {
-            "type": "object",
-            "properties": {
-                "otp": {
-                    "type": "string"
+                "data": {
+                    "$ref": "#/definitions/domain.RefreshTokenResp"
                 },
-                "phone": {
-                    "type": "string"
+                "message": {
+                    "type": "string",
+                    "example": "Tokens successfully rotated"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handler.RegisterResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/domain.RegisterResp"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Registration completed successfully. Please check your email to verify your account."
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
                 }
             }
         }
