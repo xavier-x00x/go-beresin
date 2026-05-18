@@ -75,7 +75,7 @@ go run cmd/seed/main.go
 ```
 
 ### 5. Jalankan API Server
-Untuk mengaktifkan API server Fiber di port `8080`:
+Untuk mengaktifkan API server Fiber di port `8080` pada host:
 ```bash
 # Menggunakan Doppler:
 doppler run -- go run cmd/api/main.go
@@ -83,6 +83,13 @@ doppler run -- go run cmd/api/main.go
 # Menggunakan file .env lokal:
 go run cmd/api/main.go
 ```
+
+### 6. Jalankan Seluruh Environment & API Server di Docker
+Sebagai alternatif utama, jika Anda ingin menjalankan API Server Go beserta seluruh service pendukung tambahan dalam Docker secara terpadu:
+```bash
+docker-compose up -d --build
+```
+Ini akan mem-build `Dockerfile` multi-stage aplikasi Go, menyalakan web server Fiber di port `8080`, serta menghubungkannya secara otomatis ke PostgreSQL dan Redis yang sudah berjalan di komputer lokal Anda menggunakan pemetaan `host.docker.internal`.
 
 ---
 
