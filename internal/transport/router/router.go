@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/swagger"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
+	"go-beresin/internal/service"
 	"go-beresin/internal/transport/handler"
 	"go-beresin/internal/transport/middleware"
 )
@@ -28,9 +29,10 @@ func SetupRoutes(app *fiber.App, rdb *redis.Client, dbPool *pgxpool.Pool) {
 	// 3. Swagger Route
 	app.Get("/swagger/*", swagger.HandlerDefault)
 
-	// 4. Initialise Handlers
+	// 4. Initialise Service & Handlers
 	h := handler.NewDummyHandler()
-	authH := handler.NewAuthHandler(dbPool, rdb)
+	authSvc := service.NewAuthService(dbPool, rdb)
+	authH := handler.NewAuthHandler(authSvc)
 
 	// 5. System Health Check (exempt from JWT)
 	app.Get("/health", h.HealthCheck)

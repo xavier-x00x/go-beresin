@@ -4,9 +4,9 @@
 
 -- name: CreateUser :one
 INSERT INTO users (
-  email, phone, password_hash, full_name, role, avatar_url, city, is_verified, is_active, google_id
+  id, email, phone, password_hash, full_name, role, avatar_url, city, is_verified, is_active, google_id
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+  sqlc.arg(id), sqlc.arg(email), sqlc.arg(phone), sqlc.arg(password_hash), sqlc.arg(full_name), sqlc.arg(role), sqlc.arg(avatar_url), sqlc.arg(city), sqlc.arg(is_verified), sqlc.arg(is_active), sqlc.arg(google_id)
 )
 RETURNING *;
 
@@ -26,9 +26,9 @@ SELECT * FROM users WHERE email = $1 LIMIT 1;
 
 -- name: CreateTalentProfile :one
 INSERT INTO talent_profiles (
-  user_id, bio, tagline, years_experience, service_radius_km, location, is_kyc_verified, kyc_document_url, kyc_selfie_url, subscription_tier, average_rating
+  id, user_id, bio, tagline, years_experience, service_radius_km, location, is_kyc_verified, kyc_document_url, kyc_selfie_url, subscription_tier, average_rating
 ) VALUES (
-  $1, $2, $3, $4, $5, ST_SetSRID(ST_MakePoint(cast(sqlc.arg(longitude) as float8), cast(sqlc.arg(latitude) as float8)), 4326)::geography, $6, $7, $8, $9, $10
+  sqlc.arg(id), sqlc.arg(user_id), sqlc.arg(bio), sqlc.arg(tagline), sqlc.arg(years_experience), sqlc.arg(service_radius_km), ST_SetSRID(ST_MakePoint(cast(sqlc.arg(longitude) as float8), cast(sqlc.arg(latitude) as float8)), 4326)::geography, sqlc.arg(is_kyc_verified), sqlc.arg(kyc_document_url), sqlc.arg(kyc_selfie_url), sqlc.arg(subscription_tier), sqlc.arg(average_rating)
 )
 RETURNING *;
 
@@ -62,9 +62,9 @@ ORDER BY distance_meters ASC;
 
 -- name: CreateCategory :one
 INSERT INTO categories (
-  name, slug, parent_id, icon_url, sort_order, is_active
+  id, name, slug, parent_id, icon_url, sort_order, is_active
 ) VALUES (
-  $1, $2, $3, $4, $5, $6
+  sqlc.arg(id), sqlc.arg(name), sqlc.arg(slug), sqlc.arg(parent_id), sqlc.arg(icon_url), sqlc.arg(sort_order), sqlc.arg(is_active)
 )
 RETURNING *;
 
@@ -81,9 +81,9 @@ SELECT * FROM categories WHERE parent_id = $1 AND is_active = TRUE ORDER BY sort
 
 -- name: CreateServiceListing :one
 INSERT INTO service_listings (
-  talent_id, category_id, title, description, tags, cover_image_url, gallery_urls, video_urls, status
+  id, talent_id, category_id, title, description, tags, cover_image_url, gallery_urls, video_urls, status
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $8, $9
+  sqlc.arg(id), sqlc.arg(talent_id), sqlc.arg(category_id), sqlc.arg(title), sqlc.arg(description), sqlc.arg(tags), sqlc.arg(cover_image_url), sqlc.arg(gallery_urls), sqlc.arg(video_urls), sqlc.arg(status)
 )
 RETURNING *;
 
@@ -110,9 +110,9 @@ ORDER BY sl.created_at DESC;
 
 -- name: CreateServicePackage :one
 INSERT INTO service_packages (
-  listing_id, name, description, price_amount, price_type, duration_hours, inclusions, max_revisions, sort_order
+  id, listing_id, name, description, price_amount, price_type, duration_hours, inclusions, max_revisions, sort_order
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $8, $9
+  sqlc.arg(id), sqlc.arg(listing_id), sqlc.arg(name), sqlc.arg(description), sqlc.arg(price_amount), sqlc.arg(price_type), sqlc.arg(duration_hours), sqlc.arg(inclusions), sqlc.arg(max_revisions), sqlc.arg(sort_order)
 )
 RETURNING *;
 
@@ -126,9 +126,9 @@ SELECT * FROM service_packages WHERE listing_id = $1 ORDER BY sort_order ASC;
 
 -- name: CreateOrder :one
 INSERT INTO orders (
-  order_number, user_id, talent_id, listing_id, package_id, tender_id, bid_id, title, description, work_date_start, work_date_end, location_address, final_amount, dp_amount, remaining_amount, platform_fee, talent_receive_amount, status
+  id, order_number, user_id, talent_id, listing_id, package_id, tender_id, bid_id, title, description, work_date_start, work_date_end, location_address, final_amount, dp_amount, remaining_amount, platform_fee, talent_receive_amount, status
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
+  sqlc.arg(id), sqlc.arg(order_number), sqlc.arg(user_id), sqlc.arg(talent_id), sqlc.arg(listing_id), sqlc.arg(package_id), sqlc.arg(tender_id), sqlc.arg(bid_id), sqlc.arg(title), sqlc.arg(description), sqlc.arg(work_date_start), sqlc.arg(work_date_end), sqlc.arg(location_address), sqlc.arg(final_amount), sqlc.arg(dp_amount), sqlc.arg(remaining_amount), sqlc.arg(platform_fee), sqlc.arg(talent_receive_amount), sqlc.arg(status)
 )
 RETURNING *;
 
@@ -156,9 +156,9 @@ ORDER BY o.created_at DESC;
 
 -- name: CreateAuditLog :one
 INSERT INTO audit_logs (
-  user_id, action, ip_address, user_agent
+  id, user_id, action, ip_address, user_agent
 ) VALUES (
-  $1, $2, $3, $4
+  sqlc.arg(id), sqlc.arg(user_id), sqlc.arg(action), sqlc.arg(ip_address), sqlc.arg(user_agent)
 )
 RETURNING *;
 

@@ -14,14 +14,15 @@ import (
 const createAuditLog = `-- name: CreateAuditLog :one
 
 INSERT INTO audit_logs (
-  user_id, action, ip_address, user_agent
+  id, user_id, action, ip_address, user_agent
 ) VALUES (
-  $1, $2, $3, $4
+  $1, $2, $3, $4, $5
 )
 RETURNING id, user_id, action, ip_address, user_agent, created_at
 `
 
 type CreateAuditLogParams struct {
+	ID        pgtype.UUID
 	UserID    pgtype.UUID
 	Action    string
 	IpAddress string
@@ -33,6 +34,7 @@ type CreateAuditLogParams struct {
 // ==========================================
 func (q *Queries) CreateAuditLog(ctx context.Context, arg CreateAuditLogParams) (AuditLog, error) {
 	row := q.db.QueryRow(ctx, createAuditLog,
+		arg.ID,
 		arg.UserID,
 		arg.Action,
 		arg.IpAddress,
@@ -53,14 +55,15 @@ func (q *Queries) CreateAuditLog(ctx context.Context, arg CreateAuditLogParams) 
 const createCategory = `-- name: CreateCategory :one
 
 INSERT INTO categories (
-  name, slug, parent_id, icon_url, sort_order, is_active
+  id, name, slug, parent_id, icon_url, sort_order, is_active
 ) VALUES (
-  $1, $2, $3, $4, $5, $6
+  $1, $2, $3, $4, $5, $6, $7
 )
 RETURNING id, name, slug, parent_id, icon_url, sort_order, is_active
 `
 
 type CreateCategoryParams struct {
+	ID        pgtype.UUID
 	Name      string
 	Slug      string
 	ParentID  pgtype.UUID
@@ -74,6 +77,7 @@ type CreateCategoryParams struct {
 // ==========================================
 func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error) {
 	row := q.db.QueryRow(ctx, createCategory,
+		arg.ID,
 		arg.Name,
 		arg.Slug,
 		arg.ParentID,
@@ -97,14 +101,15 @@ func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) 
 const createOrder = `-- name: CreateOrder :one
 
 INSERT INTO orders (
-  order_number, user_id, talent_id, listing_id, package_id, tender_id, bid_id, title, description, work_date_start, work_date_end, location_address, final_amount, dp_amount, remaining_amount, platform_fee, talent_receive_amount, status
+  id, order_number, user_id, talent_id, listing_id, package_id, tender_id, bid_id, title, description, work_date_start, work_date_end, location_address, final_amount, dp_amount, remaining_amount, platform_fee, talent_receive_amount, status
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
+  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19
 )
 RETURNING id, order_number, user_id, talent_id, listing_id, package_id, tender_id, bid_id, title, description, work_date_start, work_date_end, location_address, final_amount, dp_amount, remaining_amount, platform_fee, talent_receive_amount, status, progress_percentage, created_at, updated_at
 `
 
 type CreateOrderParams struct {
+	ID                  pgtype.UUID
 	OrderNumber         string
 	UserID              pgtype.UUID
 	TalentID            pgtype.UUID
@@ -130,6 +135,7 @@ type CreateOrderParams struct {
 // ==========================================
 func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error) {
 	row := q.db.QueryRow(ctx, createOrder,
+		arg.ID,
 		arg.OrderNumber,
 		arg.UserID,
 		arg.TalentID,
@@ -180,14 +186,15 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 const createServiceListing = `-- name: CreateServiceListing :one
 
 INSERT INTO service_listings (
-  talent_id, category_id, title, description, tags, cover_image_url, gallery_urls, video_urls, status
+  id, talent_id, category_id, title, description, tags, cover_image_url, gallery_urls, video_urls, status
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $8, $9
+  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
 )
 RETURNING id, talent_id, category_id, title, description, tags, cover_image_url, gallery_urls, video_urls, status, view_count, booking_count, created_at, updated_at
 `
 
 type CreateServiceListingParams struct {
+	ID            pgtype.UUID
 	TalentID      pgtype.UUID
 	CategoryID    pgtype.UUID
 	Title         string
@@ -204,6 +211,7 @@ type CreateServiceListingParams struct {
 // ==========================================
 func (q *Queries) CreateServiceListing(ctx context.Context, arg CreateServiceListingParams) (ServiceListing, error) {
 	row := q.db.QueryRow(ctx, createServiceListing,
+		arg.ID,
 		arg.TalentID,
 		arg.CategoryID,
 		arg.Title,
@@ -237,14 +245,15 @@ func (q *Queries) CreateServiceListing(ctx context.Context, arg CreateServiceLis
 const createServicePackage = `-- name: CreateServicePackage :one
 
 INSERT INTO service_packages (
-  listing_id, name, description, price_amount, price_type, duration_hours, inclusions, max_revisions, sort_order
+  id, listing_id, name, description, price_amount, price_type, duration_hours, inclusions, max_revisions, sort_order
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $8, $9
+  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
 )
 RETURNING id, listing_id, name, description, price_amount, price_type, duration_hours, inclusions, max_revisions, sort_order
 `
 
 type CreateServicePackageParams struct {
+	ID            pgtype.UUID
 	ListingID     pgtype.UUID
 	Name          string
 	Description   pgtype.Text
@@ -261,6 +270,7 @@ type CreateServicePackageParams struct {
 // ==========================================
 func (q *Queries) CreateServicePackage(ctx context.Context, arg CreateServicePackageParams) (ServicePackage, error) {
 	row := q.db.QueryRow(ctx, createServicePackage,
+		arg.ID,
 		arg.ListingID,
 		arg.Name,
 		arg.Description,
@@ -290,26 +300,27 @@ func (q *Queries) CreateServicePackage(ctx context.Context, arg CreateServicePac
 const createTalentProfile = `-- name: CreateTalentProfile :one
 
 INSERT INTO talent_profiles (
-  user_id, bio, tagline, years_experience, service_radius_km, location, is_kyc_verified, kyc_document_url, kyc_selfie_url, subscription_tier, average_rating
+  id, user_id, bio, tagline, years_experience, service_radius_km, location, is_kyc_verified, kyc_document_url, kyc_selfie_url, subscription_tier, average_rating
 ) VALUES (
-  $1, $2, $3, $4, $5, ST_SetSRID(ST_MakePoint(cast($11 as float8), cast($12 as float8)), 4326)::geography, $6, $7, $8, $9, $10
+  $1, $2, $3, $4, $5, $6, ST_SetSRID(ST_MakePoint(cast($7 as float8), cast($8 as float8)), 4326)::geography, $9, $10, $11, $12, $13
 )
 RETURNING id, user_id, bio, tagline, years_experience, service_radius_km, location, is_kyc_verified, kyc_document_url, kyc_selfie_url, kyc_reviewed_at, kyc_reviewed_by, subscription_tier, subscription_expires_at, average_rating, total_reviews, total_completed_jobs, response_time_hours, created_at
 `
 
 type CreateTalentProfileParams struct {
+	ID               pgtype.UUID
 	UserID           pgtype.UUID
 	Bio              pgtype.Text
 	Tagline          pgtype.Text
 	YearsExperience  pgtype.Int4
 	ServiceRadiusKm  pgtype.Int4
+	Longitude        float64
+	Latitude         float64
 	IsKycVerified    pgtype.Bool
 	KycDocumentUrl   pgtype.Text
 	KycSelfieUrl     pgtype.Text
 	SubscriptionTier pgtype.Text
 	AverageRating    pgtype.Numeric
-	Longitude        float64
-	Latitude         float64
 }
 
 // ==========================================
@@ -317,18 +328,19 @@ type CreateTalentProfileParams struct {
 // ==========================================
 func (q *Queries) CreateTalentProfile(ctx context.Context, arg CreateTalentProfileParams) (TalentProfile, error) {
 	row := q.db.QueryRow(ctx, createTalentProfile,
+		arg.ID,
 		arg.UserID,
 		arg.Bio,
 		arg.Tagline,
 		arg.YearsExperience,
 		arg.ServiceRadiusKm,
+		arg.Longitude,
+		arg.Latitude,
 		arg.IsKycVerified,
 		arg.KycDocumentUrl,
 		arg.KycSelfieUrl,
 		arg.SubscriptionTier,
 		arg.AverageRating,
-		arg.Longitude,
-		arg.Latitude,
 	)
 	var i TalentProfile
 	err := row.Scan(
@@ -358,14 +370,15 @@ func (q *Queries) CreateTalentProfile(ctx context.Context, arg CreateTalentProfi
 const createUser = `-- name: CreateUser :one
 
 INSERT INTO users (
-  email, phone, password_hash, full_name, role, avatar_url, city, is_verified, is_active, google_id
+  id, email, phone, password_hash, full_name, role, avatar_url, city, is_verified, is_active, google_id
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
 )
 RETURNING id, email, phone, password_hash, full_name, role, avatar_url, city, is_verified, is_active, google_id, created_at, updated_at
 `
 
 type CreateUserParams struct {
+	ID           pgtype.UUID
 	Email        pgtype.Text
 	Phone        string
 	PasswordHash pgtype.Text
@@ -383,6 +396,7 @@ type CreateUserParams struct {
 // ==========================================
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 	row := q.db.QueryRow(ctx, createUser,
+		arg.ID,
 		arg.Email,
 		arg.Phone,
 		arg.PasswordHash,

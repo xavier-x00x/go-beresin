@@ -6,6 +6,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/joho/godotenv"
+	"go-beresin/internal/domain"
 	"go-beresin/internal/repository"
 	"go-beresin/pkg/database"
 )
@@ -53,6 +54,7 @@ func main() {
 
 	for _, c := range categoriesData {
 		cat, err := queries.CreateCategory(ctx, repository.CreateCategoryParams{
+			ID:        domain.NewUUIDV7(),
 			Name:      c.Name,
 			Slug:      c.Slug,
 			SortOrder: pgtype.Int4{Int32: c.SortOrder, Valid: true},
@@ -98,6 +100,7 @@ func main() {
 		}
 
 		subCat, err := queries.CreateCategory(ctx, repository.CreateCategoryParams{
+			ID:        domain.NewUUIDV7(),
 			Name:      sc.Name,
 			Slug:      sc.Slug,
 			ParentID:  parentID,
@@ -126,6 +129,7 @@ func main() {
 
 	for _, u := range usersData {
 		_, err := queries.CreateUser(ctx, repository.CreateUserParams{
+			ID:           domain.NewUUIDV7(),
 			FullName:     u.FullName,
 			Email:        pgtype.Text{String: u.Email, Valid: true},
 			Phone:        u.Phone,
@@ -284,6 +288,7 @@ func main() {
 	for _, t := range talentsData {
 		// 1. Create User
 		user, err := queries.CreateUser(ctx, repository.CreateUserParams{
+			ID:           domain.NewUUIDV7(),
 			FullName:     t.FullName,
 			Email:        pgtype.Text{String: t.Email, Valid: true},
 			Phone:        t.Phone,
@@ -299,6 +304,7 @@ func main() {
 
 		// 2. Create Talent Profile with PostGIS coordinates
 		tp, err := queries.CreateTalentProfile(ctx, repository.CreateTalentProfileParams{
+			ID:               domain.NewUUIDV7(),
 			UserID:           user.ID,
 			Bio:              pgtype.Text{String: t.Bio, Valid: true},
 			Tagline:          pgtype.Text{String: t.Tagline, Valid: true},
@@ -323,6 +329,7 @@ func main() {
 		}
 
 		listing, err := queries.CreateServiceListing(ctx, repository.CreateServiceListingParams{
+			ID:          domain.NewUUIDV7(),
 			TalentID:    tp.ID,
 			CategoryID:  subCatID,
 			Title:       t.Listing.Title,
@@ -338,6 +345,7 @@ func main() {
 
 		// 4. Create Service Package
 		_, err = queries.CreateServicePackage(ctx, repository.CreateServicePackageParams{
+			ID:            domain.NewUUIDV7(),
 			ListingID:     listing.ID,
 			Name:          t.Listing.Package.Name,
 			Description:   pgtype.Text{String: t.Listing.Package.Description, Valid: true},
