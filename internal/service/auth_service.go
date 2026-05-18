@@ -7,8 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/mail"
-	"regexp"
 	"strings"
 	"time"
 
@@ -52,24 +50,6 @@ func NewAuthService(db *pgxpool.Pool, rdb *redis.Client) AuthService {
 	}
 }
 
-func validateRegisterInput(email, phone, password string) error {
-	if _, err := mail.ParseAddress(email); err != nil {
-		return domain.NewValidationError("invalid email format")
-	}
-	phoneRegex := regexp.MustCompile(`^(?:\+62|62|0)8[1-9][0-9]{6,10}$`)
-	if !phoneRegex.MatchString(phone) {
-		return domain.NewValidationError("invalid Indonesian phone number format")
-	}
-	if len(password) < 8 {
-		return domain.NewValidationError("password must be at least 8 characters long")
-	}
-	return nil
-}
-
-func phoneRegex() *regexp.Regexp {
-	return regexp.MustCompile(`^(?:\+62|62|0)8[1-9][0-9]{6,10}$`)
-}
-
 func (s *authService) Register(ctx context.Context, req domain.RegisterReq, ip, userAgent string) (*domain.RegisterResp, error) {
 	role := strings.ToLower(req.Role)
 	if role == "" {
@@ -77,10 +57,6 @@ func (s *authService) Register(ctx context.Context, req domain.RegisterReq, ip, 
 	}
 	if role != "user" && role != "talent" {
 		return nil, domain.NewValidationError("role must be 'user' or 'talent'")
-	}
-
-	if err := validateRegisterInput(req.Email, req.Phone, req.Password); err != nil {
-		return nil, err
 	}
 
 	_, err := s.q.GetUserByEmail(ctx, pgtype.Text{String: req.Email, Valid: true})
@@ -267,10 +243,6 @@ func (s *authService) GoogleLogin(ctx context.Context, req domain.GoogleLoginReq
 }
 
 func (s *authService) SendWhatsAppOTP(ctx context.Context, req domain.SendOtpReq) error {
-	if !phoneRegex().MatchString(req.Phone) {
-		return domain.NewValidationError("invalid Indonesian phone number format")
-	}
-
 	otp := utils.GenerateOTP()
 
 	err := s.rdb.Set(ctx, fmt.Sprintf("whatsapp_otp:%s", req.Phone), otp, 5*time.Minute).Err()

@@ -4,12 +4,29 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/mail"
+	"regexp"
 
 	"github.com/gofiber/fiber/v2"
 
 	"go-beresin/internal/domain"
 	"go-beresin/internal/service"
 )
+
+var phoneRegex = regexp.MustCompile(`^(?:\+62|62|0)8[1-9][0-9]{6,10}$`)
+
+func validateRegisterInput(email, phone, password string) error {
+	if _, err := mail.ParseAddress(email); err != nil {
+		return domain.NewValidationError("invalid email format")
+	}
+	if !phoneRegex.MatchString(phone) {
+		return domain.NewValidationError("invalid Indonesian phone number format")
+	}
+	if len(password) < 8 {
+		return domain.NewValidationError("password must be at least 8 characters long")
+	}
+	return nil
+}
 
 type AuthHandler struct {
 	service service.AuthService
@@ -76,6 +93,13 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(Response{
 			Status:  "error",
 			Message: "Invalid request payload",
+		})
+	}
+
+	if err := validateRegisterInput(req.Email, req.Phone, req.Password); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(Response{
+			Status:  "error",
+			Message: err.Error(),
 		})
 	}
 
@@ -169,6 +193,13 @@ func (h *AuthHandler) SendWhatsAppOTP(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(Response{
 			Status:  "error",
 			Message: "Invalid request payload",
+		})
+	}
+
+	if !phoneRegex.MatchString(req.Phone) {
+		return c.Status(fiber.StatusBadRequest).JSON(Response{
+			Status:  "error",
+			Message: "invalid Indonesian phone number format",
 		})
 	}
 
