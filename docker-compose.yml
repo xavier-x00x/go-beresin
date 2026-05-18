@@ -4,10 +4,12 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: go_beresin_app
     ports:
       - "8080:8080"
+    volumes:
+      - .:/app
     environment:
       - PORT=8080
       - DATABASE_URL=postgres://root:passwordroot@host.docker.internal:5432/go_beresin?sslmode=disable
