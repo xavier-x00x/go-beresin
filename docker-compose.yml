@@ -1,37 +1,6 @@
 version: '3.8'
 
 services:
-  # NOTE: PostgreSQL and Redis might already be installed locally on your host.
-  # If you are already running them on standard ports 5432 and 6379, you can
-  # either stop your local services, or change the mapped host ports below (e.g., "5433:5432" and "6380:6379").
-  
-  postgres_db:
-    image: postgis/postgis:15-3.3
-    container_name: postgres_db
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: passwordroot
-      POSTGRES_DB: go_beresin
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - beresin-network
-    restart: always
-
-  redis_cache:
-    image: redis:7.2-alpine
-    container_name: redis_cache
-    command: redis-server --requirepass !Abcd1234
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - beresin-network
-    restart: always
-
   minio:
     image: minio/minio:RELEASE.2024-01-28T22-35-53Z
     container_name: minio_storage
@@ -44,8 +13,6 @@ services:
       - "9001:9001" # MinIO Web Console
     volumes:
       - minio_data:/data
-    networks:
-      - beresin-network
     restart: always
 
   elasticsearch:
@@ -63,8 +30,6 @@ services:
       - "9200:9200"
     volumes:
       - es_data:/usr/share/elasticsearch/data
-    networks:
-      - beresin-network
     restart: always
 
   kibana:
@@ -76,16 +41,8 @@ services:
       - "5601:5601"
     depends_on:
       - elasticsearch
-    networks:
-      - beresin-network
     restart: always
 
 volumes:
-  postgres_data:
-  redis_data:
   minio_data:
   es_data:
-
-networks:
-  beresin-network:
-    driver: bridge

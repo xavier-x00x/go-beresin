@@ -40,19 +40,14 @@ go-beresin/
 ## 🚀 Panduan Setup & Eksekusi Cepat
 
 ### 1. Jalankan Environment Pendukung (Docker Compose)
-Aplikasi ini menggunakan beberapa service pendukung untuk development lokal. Jalankan container berikut dengan Docker Compose:
+Aplikasi ini menggunakan beberapa service pendukung untuk development lokal. PostgreSQL dan Redis diasumsikan sudah terinstal dan berjalan secara lokal/terpisah di komputer Anda. Jalankan service tambahan lainnya dengan Docker Compose:
 ```bash
 docker-compose up -d
 ```
-Service yang diaktifkan meliputi:
-* **PostgreSQL + PostGIS** (Port `5432`): Database spasial relasional.
-* **Redis** (Port `6379`): Cache & rate-limiter.
+Service tambahan yang diaktifkan meliputi:
 * **MinIO** (Port `9000` / `9001`): Penyimpanan berkas S3-Compatible lokal.
 * **Elasticsearch** (Port `9200`): Service pencarian teks penuh.
 * **Kibana** (Port `5601`): Panel visualisasi data Elasticsearch.
-
-> [!NOTE]
-> Jika Anda sudah menginstal PostgreSQL atau Redis secara lokal di port standar, Anda dapat menghentikan service lokal Anda terlebih dahulu atau mengubah port host di `docker-compose.yml` untuk mencegah konflik port.
 
 ### 2. Konfigurasi Environment & Secret
 Project ini mendukung **Doppler CLI** untuk manajemen secret terpusat tanpa perlu file `.env` statis secara lokal. 
