@@ -149,3 +149,36 @@ FROM orders o
 JOIN users u ON o.user_id = u.id
 WHERE o.talent_id = $1
 ORDER BY o.created_at DESC;
+
+-- ==========================================
+-- AUTHENTICATION & AUDIT QUERIES
+-- ==========================================
+
+-- name: CreateAuditLog :one
+INSERT INTO audit_logs (
+  user_id, action, ip_address, user_agent
+) VALUES (
+  $1, $2, $3, $4
+)
+RETURNING *;
+
+-- name: UpdateUserPassword :one
+UPDATE users 
+SET password_hash = $2, updated_at = NOW() 
+WHERE id = $1 
+RETURNING *;
+
+-- name: UpdateUserVerificationStatus :one
+UPDATE users 
+SET is_verified = $2, updated_at = NOW() 
+WHERE id = $1 
+RETURNING *;
+
+-- name: GetUserByGoogleID :one
+SELECT * FROM users WHERE google_id = $1 LIMIT 1;
+
+-- name: UpdateUserGoogleID :one
+UPDATE users 
+SET google_id = $2, updated_at = NOW() 
+WHERE id = $1 
+RETURNING *;

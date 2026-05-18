@@ -116,3 +116,61 @@ func (rl *RateLimiter) GlobalLimit() fiber.Handler {
 func (rl *RateLimiter) StrictLimit() fiber.Handler {
 	return rl.Limit("strict", 5, 1*time.Minute)
 }
+
+// IsIPBlocked checks if an IP address is currently blocked from logging in.
+// Returns true and the remaining block duration if blocked.
+func (rl *RateLimiter) IsIPBlocked(ctx context.Context, ip string) (bool, time.Duration, error) {
+	if rl.rdb == nil {
+		return false, 0, nil
+	}
+	key := fmt.Sprintf("auth_block:%s", ip)
+	ttl, err := rl.rdb.TTL(ctx, key).Result()
+	if err != nil {
+		return false, 0, err
+	}
+	if ttl > 0 {
+		return true, ttl, nil
+	}
+	return false, 0, nil
+}
+
+// RecordFailedLogin increments the failed login counter for an IP.
+// If it reaches 5, blocks the IP for 15 minutes.
+func (rl *RateLimiter) RecordFailedLogin(ctx context.Context, ip string) (int64, error) {
+	if rl.rdb == nil {
+		return 0, nil
+	}
+	counterKey := fmt.Sprintf("auth_failed_counter:%s", ip)
+	blockKey := fmt.Sprintf("auth_block:%s", ip)
+
+	count, err := rl.rdb.Incr(ctx, counterKey).Result()
+	if err != nil {
+		return 0, err
+	}
+
+	// Set initial TTL of 1 hour for the failed counter
+	if count == 1 {
+		rl.rdb.Expire(ctx, counterKey, 1*time.Hour)
+	}
+
+	if count >= 5 {
+		// Block IP for 15 minutes
+		err = rl.rdb.Set(ctx, blockKey, "blocked", 15*time.Minute).Err()
+		if err != nil {
+			return count, err
+		}
+		// Reset the failed counter
+		rl.rdb.Del(ctx, counterKey)
+	}
+
+	return count, nil
+}
+
+// ResetFailedLogin clears the failed login counter for an IP upon successful login.
+func (rl *RateLimiter) ResetFailedLogin(ctx context.Context, ip string) error {
+	if rl.rdb == nil {
+		return nil
+	}
+	counterKey := fmt.Sprintf("auth_failed_counter:%s", ip)
+	return rl.rdb.Del(ctx, counterKey).Err()
+}

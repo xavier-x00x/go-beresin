@@ -6,13 +6,14 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/swagger"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"go-beresin/internal/transport/handler"
 	"go-beresin/internal/transport/middleware"
 )
 
 // SetupRoutes registers all routes and middlewares.
-func SetupRoutes(app *fiber.App, rdb *redis.Client) {
+func SetupRoutes(app *fiber.App, rdb *redis.Client, dbPool *pgxpool.Pool) {
 	// 1. Global Middlewares
 	app.Use(recover.New()) // Capture panic and prevent crash
 	app.Use(cors.New())    // Enable Cross-Origin Resource Sharing
@@ -29,6 +30,7 @@ func SetupRoutes(app *fiber.App, rdb *redis.Client) {
 
 	// 4. Initialise Handlers
 	h := handler.NewDummyHandler()
+	authH := handler.NewAuthHandler(dbPool, rdb)
 
 	// 5. System Health Check (exempt from JWT)
 	app.Get("/health", h.HealthCheck)
@@ -38,7 +40,15 @@ func SetupRoutes(app *fiber.App, rdb *redis.Client) {
 
 	// Strict rate limiting specifically for auth endpoints (5 requests per minute)
 	auth := v1.Group("/auth", limiter.StrictLimit())
-	auth.Post("/login", h.LoginMock)
+	auth.Post("/register", authH.Register)
+	auth.Post("/login", authH.Login)
+	auth.Post("/login/google", authH.GoogleLogin)
+	auth.Post("/login/whatsapp/send-otp", authH.SendWhatsAppOTP)
+	auth.Post("/login/whatsapp/verify", authH.VerifyWhatsAppOTP)
+	auth.Post("/refresh-token", authH.RefreshToken)
+	auth.Post("/logout", middleware.JWTAuth(), authH.Logout)
+	auth.Post("/forgot-password", authH.ForgotPassword)
+	auth.Post("/reset-password", authH.ResetPassword)
 
 	// Protected Routes (requires valid JWT token)
 	protected := v1.Group("/", middleware.JWTAuth())

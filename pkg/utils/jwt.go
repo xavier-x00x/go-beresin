@@ -66,3 +66,41 @@ func ValidateToken(tokenStr string) (*JWTClaims, error) {
 
 	return nil, errors.New("invalid token claims")
 }
+
+// GenerateTokenPair generates a signed Access Token (15m) and Refresh Token (30d).
+func GenerateTokenPair(userID string, role string) (string, string, error) {
+	// Access Token (15 mins)
+	accessClaims := &JWTClaims{
+		UserID: userID,
+		Role:   role,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			NotBefore: jwt.NewNumericDate(time.Now()),
+			Issuer:    "go-beresin",
+		},
+	}
+	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims).SignedString(getJWTSecret())
+	if err != nil {
+		return "", "", err
+	}
+
+	// Refresh Token (30 days)
+	refreshClaims := &JWTClaims{
+		UserID: userID,
+		Role:   role,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * 24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			NotBefore: jwt.NewNumericDate(time.Now()),
+			Issuer:    "go-beresin",
+		},
+	}
+	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString(getJWTSecret())
+	if err != nil {
+		return "", "", err
+	}
+
+	return accessToken, refreshToken, nil
+}
+

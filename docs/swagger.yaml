@@ -1,5 +1,22 @@
 basePath: /
 definitions:
+  handler.ForgotPasswordReq:
+    properties:
+      email:
+        type: string
+    type: object
+  handler.GoogleLoginReq:
+    properties:
+      token:
+        type: string
+    type: object
+  handler.LoginReq:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
   handler.LoginRequest:
     properties:
       role:
@@ -7,6 +24,32 @@ definitions:
         type: string
       username:
         example: johndoe
+        type: string
+    type: object
+  handler.RefreshTokenReq:
+    properties:
+      refresh_token:
+        type: string
+    type: object
+  handler.RegisterReq:
+    properties:
+      email:
+        type: string
+      full_name:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      role:
+        description: '''user'', ''talent'''
+        type: string
+    type: object
+  handler.ResetPasswordReq:
+    properties:
+      new_password:
+        type: string
+      token:
         type: string
     type: object
   handler.Response:
@@ -17,6 +60,18 @@ definitions:
         type: string
       status:
         example: success
+        type: string
+    type: object
+  handler.SendOtpReq:
+    properties:
+      phone:
+        type: string
+    type: object
+  handler.VerifyOtpReq:
+    properties:
+      otp:
+        type: string
+      phone:
         type: string
     type: object
 host: localhost:8080
@@ -56,7 +111,67 @@ paths:
       summary: Admin Endpoint
       tags:
       - Admin
+  /api/v1/auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Request a password reset email token
+      parameters:
+      - description: Forgot Password Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ForgotPasswordReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: Forgot Password
+      tags:
+      - Authentication
   /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login with email and password
+      parameters:
+      - description: Login Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.LoginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: User Login
+      tags:
+      - Authentication
+  /api/v1/auth/login-mock:
     post:
       consumes:
       - application/json
@@ -81,6 +196,189 @@ paths:
           schema:
             $ref: '#/definitions/handler.Response'
       summary: Mock Login
+      tags:
+      - Authentication
+  /api/v1/auth/login/google:
+    post:
+      consumes:
+      - application/json
+      description: Login or register automatically via Google OAuth token
+      parameters:
+      - description: Google Token Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.GoogleLoginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: Google Social Login
+      tags:
+      - Authentication
+  /api/v1/auth/login/whatsapp/send-otp:
+    post:
+      consumes:
+      - application/json
+      description: Request a 6-digit WhatsApp login OTP
+      parameters:
+      - description: Send OTP Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.SendOtpReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: Send WhatsApp OTP
+      tags:
+      - Authentication
+  /api/v1/auth/login/whatsapp/verify:
+    post:
+      consumes:
+      - application/json
+      description: Verify WhatsApp OTP code and start login session
+      parameters:
+      - description: Verify OTP Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.VerifyOtpReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: Verify WhatsApp OTP
+      tags:
+      - Authentication
+  /api/v1/auth/logout:
+    post:
+      description: Invalidate user active session and revoke refresh token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.Response'
+      security:
+      - BearerAuth: []
+      summary: User Logout
+      tags:
+      - Authentication
+  /api/v1/auth/refresh-token:
+    post:
+      consumes:
+      - application/json
+      description: Rotate expired access token using valid refresh token
+      parameters:
+      - description: Refresh Token Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.RefreshTokenReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: Refresh Token Rotation
+      tags:
+      - Authentication
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new client or talent account
+      parameters:
+      - description: Register Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.RegisterReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: User Registration
+      tags:
+      - Authentication
+  /api/v1/auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Reset password utilizing valid email reset token
+      parameters:
+      - description: Reset Password Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ResetPasswordReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: Reset Password
       tags:
       - Authentication
   /api/v1/profile:
