@@ -1,21 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "High-performance backend API skeleton for Go Beresin featuring Fiber, Redis-based Rate Limiting, JWT auth with RBAC, and Multipart file uploading.",
-        "title": "Go Beresin API",
-        "termsOfService": "http://swagger.io/terms/",
-        "contact": {
-            "name": "API Support",
-            "email": "support@go-beresin.com"
-        },
-        "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-        },
-        "version": "1.0.0"
+        "contact": {}
     },
-    "host": "localhost:8080",
-    "basePath": "/",
     "paths": {
         "/api/v1/admin": {
             "get": {
@@ -839,14 +826,6 @@
                     "example": true
                 }
             }
-        }
-    },
-    "securityDefinitions": {
-        "BearerAuth": {
-            "description": "Type \"Bearer \u003cyour_token\u003e\" to authenticate.",
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
         }
     }
 }
