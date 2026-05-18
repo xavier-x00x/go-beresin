@@ -11,6 +11,45 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createAuditLog = `-- name: CreateAuditLog :one
+
+INSERT INTO audit_logs (
+  user_id, action, ip_address, user_agent
+) VALUES (
+  $1, $2, $3, $4
+)
+RETURNING id, user_id, action, ip_address, user_agent, created_at
+`
+
+type CreateAuditLogParams struct {
+	UserID    pgtype.UUID
+	Action    string
+	IpAddress string
+	UserAgent string
+}
+
+// ==========================================
+// AUTHENTICATION & AUDIT QUERIES
+// ==========================================
+func (q *Queries) CreateAuditLog(ctx context.Context, arg CreateAuditLogParams) (AuditLog, error) {
+	row := q.db.QueryRow(ctx, createAuditLog,
+		arg.UserID,
+		arg.Action,
+		arg.IpAddress,
+		arg.UserAgent,
+	)
+	var i AuditLog
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Action,
+		&i.IpAddress,
+		&i.UserAgent,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const createCategory = `-- name: CreateCategory :one
 
 INSERT INTO categories (
@@ -820,6 +859,31 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email pgtype.Text) (User, 
 	return i, err
 }
 
+const getUserByGoogleID = `-- name: GetUserByGoogleID :one
+SELECT id, email, phone, password_hash, full_name, role, avatar_url, city, is_verified, is_active, google_id, created_at, updated_at FROM users WHERE google_id = $1 LIMIT 1
+`
+
+func (q *Queries) GetUserByGoogleID(ctx context.Context, googleID pgtype.Text) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByGoogleID, googleID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Phone,
+		&i.PasswordHash,
+		&i.FullName,
+		&i.Role,
+		&i.AvatarUrl,
+		&i.City,
+		&i.IsVerified,
+		&i.IsActive,
+		&i.GoogleID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getUserByID = `-- name: GetUserByID :one
 SELECT id, email, phone, password_hash, full_name, role, avatar_url, city, is_verified, is_active, google_id, created_at, updated_at FROM users WHERE id = $1 LIMIT 1
 `
@@ -1006,4 +1070,103 @@ func (q *Queries) ListSubCategories(ctx context.Context, parentID pgtype.UUID) (
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateUserGoogleID = `-- name: UpdateUserGoogleID :one
+UPDATE users 
+SET google_id = $2, updated_at = NOW() 
+WHERE id = $1 
+RETURNING id, email, phone, password_hash, full_name, role, avatar_url, city, is_verified, is_active, google_id, created_at, updated_at
+`
+
+type UpdateUserGoogleIDParams struct {
+	ID       pgtype.UUID
+	GoogleID pgtype.Text
+}
+
+func (q *Queries) UpdateUserGoogleID(ctx context.Context, arg UpdateUserGoogleIDParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUserGoogleID, arg.ID, arg.GoogleID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Phone,
+		&i.PasswordHash,
+		&i.FullName,
+		&i.Role,
+		&i.AvatarUrl,
+		&i.City,
+		&i.IsVerified,
+		&i.IsActive,
+		&i.GoogleID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateUserPassword = `-- name: UpdateUserPassword :one
+UPDATE users 
+SET password_hash = $2, updated_at = NOW() 
+WHERE id = $1 
+RETURNING id, email, phone, password_hash, full_name, role, avatar_url, city, is_verified, is_active, google_id, created_at, updated_at
+`
+
+type UpdateUserPasswordParams struct {
+	ID           pgtype.UUID
+	PasswordHash pgtype.Text
+}
+
+func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUserPassword, arg.ID, arg.PasswordHash)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Phone,
+		&i.PasswordHash,
+		&i.FullName,
+		&i.Role,
+		&i.AvatarUrl,
+		&i.City,
+		&i.IsVerified,
+		&i.IsActive,
+		&i.GoogleID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateUserVerificationStatus = `-- name: UpdateUserVerificationStatus :one
+UPDATE users 
+SET is_verified = $2, updated_at = NOW() 
+WHERE id = $1 
+RETURNING id, email, phone, password_hash, full_name, role, avatar_url, city, is_verified, is_active, google_id, created_at, updated_at
+`
+
+type UpdateUserVerificationStatusParams struct {
+	ID         pgtype.UUID
+	IsVerified pgtype.Bool
+}
+
+func (q *Queries) UpdateUserVerificationStatus(ctx context.Context, arg UpdateUserVerificationStatusParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUserVerificationStatus, arg.ID, arg.IsVerified)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Phone,
+		&i.PasswordHash,
+		&i.FullName,
+		&i.Role,
+		&i.AvatarUrl,
+		&i.City,
+		&i.IsVerified,
+		&i.IsActive,
+		&i.GoogleID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

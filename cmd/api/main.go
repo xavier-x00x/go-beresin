@@ -12,6 +12,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
 	"go-beresin/internal/transport/router"
+	"go-beresin/pkg/database"
 
 	// Import Swagger generated docs
 	_ "go-beresin/docs"
@@ -76,7 +77,13 @@ func main() {
 		log.Println("[INFO] Successfully connected to Redis.")
 	}
 
-	// 3. Initialize Fiber App
+	// 3. Initialize PostgreSQL connection pool
+	dbPool, err := database.InitPool(ctx)
+	if err != nil {
+		log.Fatalf("[FATAL] Could not initialize PostgreSQL pool: %v", err)
+	}
+
+	// 4. Initialize Fiber App
 	app := fiber.New(fiber.Config{
 		AppName:      "Go Beresin API v1.0.0",
 		ReadTimeout:  10 * time.Second,
@@ -84,10 +91,10 @@ func main() {
 		IdleTimeout:  120 * time.Second,
 	})
 
-	// 4. Setup Routing
-	router.SetupRoutes(app, rdb)
+	// 5. Setup Routing
+	router.SetupRoutes(app, rdb, dbPool)
 
-	// 5. Channel to catch errors during startup
+	// 6. Channel to catch errors during startup
 	serverErrors := make(chan error, 1)
 
 	// Start server in a goroutine
@@ -98,7 +105,7 @@ func main() {
 		}
 	}()
 
-	// 6. Graceful Shutdown
+	// 7. Graceful Shutdown
 	// Channel to listen for terminate signals from OS
 	shutdownChannel := make(chan os.Signal, 1)
 	signal.Notify(shutdownChannel, os.Interrupt, syscall.SIGTERM)
@@ -115,6 +122,10 @@ func main() {
 		if err := app.ShutdownWithTimeout(15 * time.Second); err != nil {
 			log.Printf("[WARNING] Graceful server shutdown failed: %v, forcing close", err)
 		}
+
+		// Close PostgreSQL pool
+		log.Println("[INFO] Closing PostgreSQL connection pool...")
+		dbPool.Close()
 
 		// Close Redis connection
 		if rdb != nil {

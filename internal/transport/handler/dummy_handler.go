@@ -51,7 +51,7 @@ func (h *DummyHandler) HealthCheck(c *fiber.Ctx) error {
 // @Param request body LoginRequest true "Login Payload"
 // @Success 200 {object} Response
 // @Failure 400 {object} Response
-// @Router /api/v1/auth/login [post]
+// @Router /api/v1/auth/login-mock [post]
 func (h *DummyHandler) LoginMock(c *fiber.Ctx) error {
 	req := new(LoginRequest)
 	if err := c.BodyParser(req); err != nil {

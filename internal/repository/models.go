@@ -8,6 +8,15 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type AuditLog struct {
+	ID        pgtype.UUID
+	UserID    pgtype.UUID
+	Action    string
+	IpAddress string
+	UserAgent string
+	CreatedAt pgtype.Timestamptz
+}
+
 type Bid struct {
 	ID                     pgtype.UUID
 	TenderID               pgtype.UUID
