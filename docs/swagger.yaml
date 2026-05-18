@@ -1,0 +1,153 @@
+basePath: /
+definitions:
+  handler.LoginRequest:
+    properties:
+      role:
+        example: admin
+        type: string
+      username:
+        example: johndoe
+        type: string
+    type: object
+  handler.Response:
+    properties:
+      data: {}
+      message:
+        example: Operation completed successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@go-beresin.com
+    name: API Support
+  description: High-performance backend API skeleton for Go Beresin featuring Fiber,
+    Redis-based Rate Limiting, JWT auth with RBAC, and Multipart file uploading.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Go Beresin API
+  version: 1.0.0
+paths:
+  /api/v1/admin:
+    get:
+      description: 'Access administrator dashboard (restricted to role: admin)'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.Response'
+      security:
+      - BearerAuth: []
+      summary: Admin Endpoint
+      tags:
+      - Admin
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 'Authenticate a dummy user and return a JWT token (roles: user,
+        admin)'
+      parameters:
+      - description: Login Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: Mock Login
+      tags:
+      - Authentication
+  /api/v1/profile:
+    get:
+      description: Fetch authenticated user identity from Bearer token claims
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Profile
+      tags:
+      - Users
+  /api/v1/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload any photo, video, or document (max 10MB limit)
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: File Upload
+      tags:
+      - Uploads
+  /health:
+    get:
+      description: Check if the server is up and healthy
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: Health Check
+      tags:
+      - System
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer <your_token>" to authenticate.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
