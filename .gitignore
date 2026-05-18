@@ -1,0 +1,15 @@
+# Environment variables
+.env
+
+# Binaries and executables
+/api
+/go-beresin
+/go-beresin-server
+test_geo
+
+# IDEs
+.idea/
+.vscode/
+
+# System files
+.DS_Store
